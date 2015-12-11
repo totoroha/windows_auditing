@@ -1,0 +1,131 @@
+<form>
+  <label>User Auditing</label>
+  <fieldset submitButton="true">
+    <input type="time" token="v_time" searchWhenChanged="true">
+      <label>Time Range</label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="username" searchWhenChanged="true">
+      <label>Username</label>
+      <default>*</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <title>Failed Authentications</title>
+        <search>
+          <query>index=wineventlog sourcetype="WMI:WinEventLog:Security" action=failure User_Name!="*$*"  | eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)  | search User_Name="$username$"| stats sparkline(count) as activity count by src_ip User_Name ComputerName subject | sort -count</query>
+          <earliest>$v_time.earliest$</earliest>
+          <latest>$v_time.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">10</option>
+        <!-- Set sparkline options here; make sure that field matches field name of the search results -->
+        <format type="sparkline" field="activity">
+          <option name="lineColor">#3498db</option>
+          <option name="fillColor">#ecf0f1</option>
+          <option name="lineWidth">1</option>
+          <option name="maxSpotColor">#e74c3c</option>
+          <option name="spotRadius">3</option>
+          <option name="height">25px</option>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Successful Authentications</title>
+        <search>
+          <query>index=wineventlog sourcetype="WMI:WinEventLog:Security" action=success User_Name!="*$*"| eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)  | search User_Name="$username$"| stats sparkline(count) as activity count by src_ip User_Name ComputerName subject | sort -count</query>
+          <earliest>$v_time.earliest$</earliest>
+          <latest>$v_time.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+        <!-- Set sparkline options here; make sure that field matches field name of the search results -->
+        <format type="sparkline" field="activity">
+          <option name="lineColor">#3498db</option>
+          <option name="fillColor">#ecf0f1</option>
+          <option name="lineWidth">1</option>
+          <option name="maxSpotColor">#e74c3c</option>
+          <option name="spotRadius">3</option>
+          <option name="height">25px</option>
+        </format>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Failed Logins/Account Lockouts</title>
+        <search>
+          <query>index=wineventlog "EventCode=4625" OR "EventCode=529" OR "EventCode=531" User_Name!="*$*"| eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)   | search User_Name="$username$"|  stats sparkline(count) as activity count by src_ip User_Name ComputerName subject | sort -count</query>
+          <earliest>$v_time.earliest$</earliest>
+          <latest>$v_time.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+        <!-- Set sparkline options here; make sure that field matches field name of the search results -->
+        <format type="sparkline" field="activity">
+          <option name="lineColor">#3498db</option>
+          <option name="fillColor">#ecf0f1</option>
+          <option name="lineWidth">1</option>
+          <option name="maxSpotColor">#e74c3c</option>
+          <option name="spotRadius">3</option>
+          <option name="height">25px</option>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Successful Logins</title>
+        <search>
+          <query>index=wineventlog "EventCode=540"User_Name=$username$ User_Name!="*$*"| eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)   | search User_Name="$username$"|  stats sparkline(count) as activity count by src_ip User_Name ComputerName subject | sort -count</query>
+          <earliest>$v_time.earliest$</earliest>
+          <latest>$v_time.latest$</latest>
+        </search>
+        <option name="wrap">undefined</option>
+        <option name="rowNumbers">undefined</option>
+        <option name="drilldown">row</option>
+        <!-- Set sparkline options here; make sure that field matches field name of the search results -->
+        <format type="sparkline" field="activity">
+          <option name="lineColor">#3498db</option>
+          <option name="fillColor">#ecf0f1</option>
+          <option name="lineWidth">1</option>
+          <option name="maxSpotColor">#e74c3c</option>
+          <option name="spotRadius">3</option>
+          <option name="height">25px</option>
+        </format>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Did the User add Anyone to a Privileged Group?</title>
+        <search>
+          <query>index=wineventlog EventCode="4728" OR EventCode="4732" OR EventCode="4756" User_Name!="*$*" | eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)   | search User_Name="$username$"|  table src_ip User_Name ComputerName Group_Name Security_ID subject</query>
+          <earliest>$v_time.earliest$</earliest>
+          <latest>$v_time.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+</form>

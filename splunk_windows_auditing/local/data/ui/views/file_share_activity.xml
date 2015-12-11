@@ -1,0 +1,120 @@
+<form>
+  <label>Windows File Share Activity</label>
+  <fieldset submitButton="true">
+    <input type="time" token="v_time" searchWhenChanged="true">
+      <label>Time Range</label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="v_user" searchWhenChanged="true">
+      <label>User</label>
+      <default>*</default>
+    </input>
+    <input type="text" token="v_ID" searchWhenChanged="true">
+      <label>Handle ID</label>
+      <default>*</default>
+    </input>
+    <input type="dropdown" token="v_host" searchWhenChanged="true">
+      <label>Host</label>
+      <choice value="*">All</choice>
+      <search>
+        <query>| tstats values(host) AS st where index=wineventlog by index | fields st | mvexpand st</query>
+      </search>
+      <fieldForLabel>host</fieldForLabel>
+      <fieldForValue>st</fieldForValue>
+      <default>*</default>
+    </input>
+    <input type="text" token="v_filename" searchWhenChanged="true">
+      <label>File Name</label>
+      <default>*</default>
+      <prefix>*</prefix>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <input type="dropdown" token="action">
+        <label>Action</label>
+        <choice value="*">All</choice>
+        <choice value="Created">Created</choice>
+        <choice value="Deleted">Deleted</choice>
+        <default>*</default>
+      </input>
+      <table>
+        <title>File Share Access</title>
+        <search>
+          <query>index=wineventlog Object_Name="$v_filename$" host=$v_host$ EventCode=4663 OR EventCode=4656 Account_Name!="*$*" | search Account_Name=$v_user$ | eval Time=strftime(_time, "%m/%d/%y %H:%M:%S %Z") | eval Action=case(Accesses="READ_CONTROL","Created", Accesses="WriteData", "Created", Accesses="DELETE", "Deleted") |search Action="$action$"| Rename  Account_Name as "User" host as "Server" Object_Name as "Object Name" Object_Type as "Object Type" | stats  count by User Server "Object Name" "Object Type" Handle_ID Action Accesses | sort -count</query>
+          <earliest>$v_time.earliest$</earliest>
+          <latest>$v_time.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">10</option>
+        <drilldown>
+          <!-- Use set to specify the new token to be created.
+Use any token from the page or from the click event to produce the value needed. -->
+          <set token="v_ID">$row.Handle_ID$</set>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>User Activity &amp; Handle Detail</title>
+        <search>
+          <query>index=wineventlog host=$v_host$ Account_Name=$v_user$ Handle_ID=$v_ID$ | eval Time=strftime(_time, "%m/%d/%y %H:%M:%S %Z") | eval Action=case(Accesses="READ_CONTROL","Created", Accesses="WriteData", "Created", Accesses="DELETE", "Deleted") | Rename Time as "What Time" Account_Name as "Who did it" host as "On What Server" Object_Name as "Object Name" Object_Type as "Object Type" | table "What Time" "Who did it" "On What Server" "Object Name" "Object Type" Action Accesses</query>
+          <earliest>$v_time.earliest$</earliest>
+          <latest>$v_time.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>User Activity &amp; Handle Detail</title>
+        <search>
+          <query>index=wineventlog host=$v_host$ Account_Name=$v_user$ Handle_ID=$v_ID$ | eval Action=case(Accesses="READ_CONTROL","Created", Accesses="WriteData", "Created", Accesses="DELETE", "Deleted") | search Action=Created OR Action=Deleted | timechart count by Action</query>
+          <earliest>$v_time.earliest$</earliest>
+          <latest>$v_time.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+</form>
