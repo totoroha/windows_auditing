@@ -1,4 +1,4 @@
-# Splunk Windows Auditing
+# Splunk Windows Auditing ![alt tag](http://i.imgur.com/5JNr97l.png)
 This app is can be used to track user activity using best practices from the National Security Agency’s Spotting the Adversary with Windows Handbook. 
 The dashboards and searches provide auditors with a full view of how a user is interacting with their local computer and other systems on the network.
 
