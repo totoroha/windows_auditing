@@ -1,4 +1,4 @@
-<nav search_view="search" color="#65A637">
+<nav search_view="search" color="#2c3e50">
   <view name="search" default='true' />
   <view name="data_models" />
   <view name="reports" />
