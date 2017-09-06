@@ -18,7 +18,7 @@
       <table>
         <title>Failed Authentications</title>
         <search>
-          <query>sourcetype="wineventlog:security" action=failure User_Name="*$*"  | eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)  | search User_Name="$username$"| stats sparkline(count) as activity count by src_ip User_Name ComputerName subject | sort -count</query>
+          <query>sourcetype="wineventlog:security" action=failure User_Name="*$*"| eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)  | search User_Name="$username$"| stats sparkline(count) as activity count by src_ip User_Name ComputerName subject | sort -count</query>
           <earliest>$v_time.earliest$</earliest>
           <latest>$v_time.latest$</latest>
         </search>
