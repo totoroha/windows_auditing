@@ -18,7 +18,7 @@
       <table>
         <title>Failed Authentications</title>
         <search>
-          <query>eventtype=wineventlog-security action=failure User_Name="*$*"  | eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)  | search User_Name="$username$"| stats sparkline(count) as activity count by src_ip User_Name ComputerName subject | sort -count</query>
+          <query>sourcetype="wineventlog:security" action=failure User_Name="*$*"  | eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)  | search User_Name="$username$"| stats sparkline(count) as activity count by src_ip User_Name ComputerName subject | sort -count</query>
           <earliest>$v_time.earliest$</earliest>
           <latest>$v_time.latest$</latest>
         </search>
@@ -42,7 +42,7 @@
       <table>
         <title>Successful Authentications</title>
         <search>
-          <query>eventtype=wineventlog-security action=success User_Name="*$*"| eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)  | search User_Name="$username$"| stats sparkline(count) as activity count by src_ip User_Name ComputerName subject | sort -count</query>
+          <query>sourcetype="wineventlog:security" action=success User_Name="*$*"| eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)  | search User_Name="$username$"| stats sparkline(count) as activity count by src_ip User_Name ComputerName subject | sort -count</query>
           <earliest>$v_time.earliest$</earliest>
           <latest>$v_time.latest$</latest>
         </search>
@@ -68,7 +68,7 @@
       <table>
         <title>Failed Logins/Account Lockouts</title>
         <search>
-          <query>index=wineventlog "EventCode=4625" OR "EventCode=529" OR "EventCode=531" User_Name="*$*"| eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)   | search User_Name="$username$"|  stats sparkline(count) as activity count by src_ip User_Name ComputerName subject | sort -count</query>
+          <query>sourcetype="wineventlog:security" ("EventCode=4625" OR "EventCode=529" OR "EventCode=531") User_Name="*$*"| eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)   | search User_Name="$username$"|  stats sparkline(count) as activity count by src_ip User_Name ComputerName subject | sort -count</query>
           <earliest>$v_time.earliest$</earliest>
           <latest>$v_time.latest$</latest>
         </search>
@@ -92,7 +92,7 @@
       <table>
         <title>Successful Logins</title>
         <search>
-          <query>index=wineventlog "EventCode=540" User_Name="*$*"| eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)   | search User_Name="$username$"|  stats sparkline(count) as activity count by src_ip User_Name ComputerName subject | sort -count</query>
+          <query>sourcetype="wineventlog:security" (EventCode=540 OR EventCode=4624) User_Name="*$*"| eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)   | search User_Name="$username$"|  stats sparkline(count) as activity count by src_ip User_Name ComputerName subject | sort -count</query>
           <earliest>$v_time.earliest$</earliest>
           <latest>$v_time.latest$</latest>
         </search>
@@ -116,7 +116,7 @@
       <table>
         <title>Did the User add Anyone to a Privileged Group?</title>
         <search>
-          <query>index=wineventlog EventCode="4728" OR EventCode="4732" OR EventCode="4756" User_Name="*$*" | eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)   | search User_Name="$username$"|  table src_ip User_Name ComputerName Group_Name Security_ID subject</query>
+          <query>sourcetype="wineventlog:security" EventCode="4728" OR EventCode="4732" OR EventCode="4756" User_Name="*$*" | eval User_Name=if((User_Name="-" OR User_Name="SYSTEM"), (mvindex(User_Name,1)), User_Name)   | search User_Name="$username$"|  table src_ip User_Name ComputerName Group_Name Security_ID subject</query>
           <earliest>$v_time.earliest$</earliest>
           <latest>$v_time.latest$</latest>
         </search>
